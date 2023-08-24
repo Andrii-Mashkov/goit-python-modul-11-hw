@@ -18,6 +18,7 @@ setter та getter логіку для атрибутів value спадкоєм
 
 from collections import UserDict
 from datetime import datetime
+# from re import match
 
 class Field:
     def __init__(self, value):
@@ -28,42 +29,66 @@ class Name(Field):
 
 class Phone(Field):
     def __init__(self, value):
-        if not self.value.isdigit():
+        self.__value = None  # додаємо захищенне поле
+        self.value = value
+
+    @staticmethod
+    def is_valid_phone(value):
+        if not all(value.isdigit()) or len(value) <= 0:
             raise ValueError("Invalid phone format. Please use only '0123456789'.")
-    
+        return True
+
     @property
     def value(self):
         return self.__value
 
     @value.setter
     def value(self, new_value):
-        if not self.__value.isdigit():
-            raise ValueError("Invalid phone format. Please use only '0123456789'.")
-
-    def is_valid_phone(self):
-        pass        
+        if self.is_valid_phone(new_value):
+            self.__value = new_value
 
 class Email(Field):
-    def is_valid_email(self):
-        pass
+    def __init__(self, value):
+        self.__value = None  # додаємо захищенне поле
+        self.value = value
+
+    @staticmethod
+    def is_valid_email(value):
+        pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+        if not all(value.isstr()) or len(value) <= 0: #  or re.match(pattern, value):
+            raise ValueError("Invalid email format. Please use only '*@*.*'.")
+        return True
+
+    @property
+    def value(self):
+        return self.__value
+
+    @value.setter
+    def value(self, new_value):
+        if self.is_valid_email(new_value):
+            self.__value = new_value      
 
 class Birthday(Field):
     def __init__(self, value):
+        self.__value = None  # додаємо захищенне поле
+        self.value = value
+
+    @staticmethod
+    def is_valid_birthday(new_value):
         try:
-            self.value = datetime.strtime(value, '%d-%m-%Y').date()
+            _ = datetime.strptime(new_value, '%d-%m-%Y').date()
         except ValueError:
-            raise ValueError("Invalid date format. Please use 'DD-MM-YYYY'.")
-    
+            raise ValueError("Invalid birthday format. Please use 'DD-MM-YYYY'.")
+        return True
+
     @property
     def value(self):
         return self.__value
 
     @value.setter
     def value(self, new_value):
-        try:
-            self.__value == datetime.strptime(new_value, '%d-%m-%Y').date()
-        except ValueError:
-            raise ValueError("Invalid date format. Please use 'DD-MM-YYYY'.")
+        if self.is_valid_birthday(new_value):
+            self.__value = new_value
 
 class Record:
     def __init__(self, name: str, phones: list, emails: list, birthday: str = None):
